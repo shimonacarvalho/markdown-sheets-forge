@@ -1,6 +1,7 @@
 import { CheatsheetTable } from '@/types/cheatsheet';
 
 export function parseMarkdownTable(markdown: string): CheatsheetTable | null {
+  // Split markdown into lines and filter out empty lines
   const lines = markdown.trim().split('\n').filter(line => line.trim());
   
   if (lines.length < 2) return null;
@@ -23,18 +24,10 @@ export function parseMarkdownTable(markdown: string): CheatsheetTable | null {
   );
   
   if (separatorIndex === -1) return null;
-  
-  // Parse header row
-  const headerLine = lines[separatorIndex - 1];
-  if (!headerLine || !headerLine.includes('|')) return null;
-  
-  const headers = headerLine.split('|')
-    .map(cell => cell.trim())
-    .filter(cell => cell);
-  
+    
   // Parse data rows
   const dataRows: string[][] = [];
-  
+  const columnCount = lines[separatorIndex].split('|').length;
   for (let i = separatorIndex + 1; i < lines.length; i++) {
     const line = lines[i].trim();
     if (!line.includes('|')) continue;
@@ -46,17 +39,14 @@ export function parseMarkdownTable(markdown: string): CheatsheetTable | null {
     if (cells.length > 0) {
       dataRows.push(cells);
     }
+
   }
-  
-  // If no title was found, use first header cell
-  if (!title && headers.length > 0) {
-    title = headers[0];
-  }
-  
+    
   return {
     id: Date.now().toString() + Math.random().toString(36).substr(2, 9),
     title: title || 'Untitled Table',
-    rows: [headers, ...dataRows]
+    rows: dataRows,
+    columnCount: columnCount
   };
 }
 
@@ -65,21 +55,17 @@ export function tableToMarkdown(table: CheatsheetTable): string {
   
   let markdown = `| ${table.title} |\n`;
   
-  const [headers, ...dataRows] = table.rows;
+  const dataRows = table.rows;
   
-  // Add header row
-  if (headers && headers.length > 0) {
-    markdown += `| ${headers.join(' | ')} |\n`;
-    
-    // Add separator
-    const separator = headers.map(() => '--------').join(' | ');
-    markdown += `| ${separator} |\n`;
-    
-    // Add data rows
-    dataRows.forEach(row => {
-      markdown += `| ${row.join(' | ')} |\n`;
-    });
-  }
+  
+  // Add separator
+  const separator = Array(table.columnCount).fill('--------').join(' | ');
+  markdown += `| ${separator} |\n`;
+  
+  // Add data rows
+  dataRows.forEach(row => {
+    markdown += `| ${row.join(' | ')} |\n`;
+  });
   
   return markdown;
 }

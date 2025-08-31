@@ -118,9 +118,17 @@ export function CheatsheetEditor({ cheatsheet, onUpdate }: CheatsheetEditorProps
   };
 
   return (
-    <div className="max-w-4xl mx-auto p-6 space-y-6">
+    <div className="max-w-4xl mx-auto p-0 space-y-2">
+      {/* Print-only header */}
+      <div className="hidden print:block print:mb-6">
+        <h1 className="text-2xl font-bold mb-2">{cheatsheet.name}</h1>
+        {cheatsheet.description && (
+          <p className="text-muted-foreground">{cheatsheet.description}</p>
+        )}
+      </div>
+
       {/* Header */}
-      <Card>
+      <Card className="no-print">
         <CardHeader>
           <CardTitle>Cheatsheet Editor</CardTitle>
         </CardHeader>
@@ -184,15 +192,17 @@ export function CheatsheetEditor({ cheatsheet, onUpdate }: CheatsheetEditorProps
       </Card>
 
       {/* Print-optimized layout */}
-      <div className={`grid gap-4 print:gap-2 ${
-        cheatsheet.columns === 2 ? 'md:grid-cols-2' : 'md:grid-cols-3'
-      } print:text-xs`}>
+      <div className={`grid gap-4 print:gap-4 border-red-500 ${
+        cheatsheet.columns === 2 
+          ? 'md:grid-cols-2 print:grid-cols-2' 
+          : 'md:grid-cols-3 print:grid-cols-3'
+      } print:text-xs print:w-full`}>
         {cheatsheet.tables.length > 0 ? (
           <DndContext 
             sensors={sensors}
             collisionDetection={closestCenter}
             onDragEnd={handleDragEnd}
-            modifiers={[restrictToVerticalAxis]}
+            modifiers={[]}
           >
             <SortableContext 
               items={cheatsheet.tables.map(table => table.id)}

@@ -74,7 +74,7 @@ export function CheatsheetPreview({ cheatsheet, onBack }: CheatsheetPreviewProps
                     <table className="cheatsheet-table text-xs">
                       <thead>
                         <tr>
-                          <th colSpan={headers.length} className="text-center font-bold bg-primary/5 border-b-2 border-primary/20 px-2 py-1">
+                          <th colSpan={columnCount} className="text-center font-bold bg-primary/5 border-b-2 border-primary/20 px-2 py-1">
                             {table.title}
                           </th>
                         </tr>

@@ -1,12 +1,12 @@
-import { useState } from 'react';
-import { CheatsheetTable as TableType } from '@/types/cheatsheet';
-import { Card } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Textarea } from '@/components/ui/textarea';
-import { GripVertical, Trash2, Edit, Save, X } from 'lucide-react';
-import { useSortable } from '@dnd-kit/sortable';
-import { CSS } from '@dnd-kit/utilities';
-import { parseMarkdownTable } from '@/utils/markdown';
+import { useState } from "react";
+import { CheatsheetTable as TableType } from "@/types/cheatsheet";
+import { Card } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Textarea } from "@/components/ui/textarea";
+import { GripVertical, Trash2, Edit, Save, X } from "lucide-react";
+import { useSortable } from "@dnd-kit/sortable";
+import { CSS } from "@dnd-kit/utilities";
+import { parseMarkdownTable } from "@/utils/markdown";
 
 interface CheatsheetTableProps {
   table: TableType;
@@ -15,10 +15,15 @@ interface CheatsheetTableProps {
   isDragging?: boolean;
 }
 
-export function CheatsheetTable({ table, onDelete, onUpdate, isDragging }: CheatsheetTableProps) {
+export function CheatsheetTable({
+  table,
+  onDelete,
+  onUpdate,
+  isDragging,
+}: CheatsheetTableProps) {
   const [isEditing, setIsEditing] = useState(false);
-  const [editContent, setEditContent] = useState('');
-  
+  const [editContent, setEditContent] = useState("");
+
   const {
     attributes,
     listeners,
@@ -37,17 +42,16 @@ export function CheatsheetTable({ table, onDelete, onUpdate, isDragging }: Cheat
 
   if (table.rows.length === 0) return null;
 
-  const [headers, ...dataRows] = table.rows;
+  const dataRows = table.rows;
 
   const handleEdit = () => {
     // Convert table back to markdown for editing
     let markdown = `| ${table.title} |\n`;
-    markdown += `| ${headers.join(' | ')} |\n`;
-    markdown += `| ${headers.map(() => '--------').join(' | ')} |\n`;
-    dataRows.forEach(row => {
-      markdown += `| ${row.join(' | ')} |\n`;
+    markdown += `| ${dataRows[0].map(() => "--------").join(" | ")} |\n`;
+    dataRows.forEach((row) => {
+      markdown += `| ${row.join(" | ")} |\n`;
     });
-    
+
     setEditContent(markdown);
     setIsEditing(true);
   };
@@ -60,30 +64,31 @@ export function CheatsheetTable({ table, onDelete, onUpdate, isDragging }: Cheat
           ...table,
           title: updatedTable.title,
           rows: updatedTable.rows,
+          columnCount: updatedTable.columnCount,
         });
         setIsEditing(false);
       }
     } catch (error) {
-      console.error('Error parsing markdown:', error);
+      console.error("Error parsing markdown:", error);
     }
   };
 
   const handleCancel = () => {
     setIsEditing(false);
-    setEditContent('');
+    setEditContent("");
   };
 
   return (
-    <Card 
-      ref={setNodeRef} 
+    <Card
+      ref={setNodeRef}
       style={style}
-      className={`relative group transition-all duration-200 print-table ${
-        isCurrentlyDragging ? 'dragging shadow-lg' : 'hover:shadow-md'
+      className={`relative group transition-all duration-200 print-table print:border-0 print:shadow-none ${
+        isCurrentlyDragging ? "dragging shadow-lg" : "hover:shadow-md"
       }`}
     >
       <div className="flex items-center justify-between p-3 border-b no-print">
         <div className="flex items-center gap-2">
-          <div 
+          <div
             className="drag-handle cursor-grab active:cursor-grabbing"
             {...attributes}
             {...listeners}
@@ -134,8 +139,8 @@ export function CheatsheetTable({ table, onDelete, onUpdate, isDragging }: Cheat
           )}
         </div>
       </div>
-      
-      <div className="p-3">
+
+      <div className="p-0">
         {isEditing ? (
           <Textarea
             value={editContent}
@@ -147,16 +152,21 @@ export function CheatsheetTable({ table, onDelete, onUpdate, isDragging }: Cheat
           <table className="cheatsheet-table w-full">
             <thead>
               <tr>
-                {headers.map((header, index) => (
-                  <th key={index} className="text-left p-2 border-b font-semibold">{header}</th>
-                ))}
+                <th
+                  colSpan={table.columnCount}
+                  className="text-center font-bold bg-gray-100 uppercase px-2 py-1"
+                >
+                  {table.title}
+                </th>
               </tr>
             </thead>
             <tbody>
               {dataRows.map((row, rowIndex) => (
                 <tr key={rowIndex}>
                   {row.map((cell, cellIndex) => (
-                    <td key={cellIndex} className="p-2 border-b text-sm">{cell}</td>
+                    <td key={cellIndex} className="p-2 text-sm">
+                      {cell}
+                    </td>
                   ))}
                 </tr>
               ))}

@@ -136,15 +136,15 @@
 @layer components {
   /* Cheatsheet specific components */
   .cheatsheet-table {
-    @apply w-full border-collapse border border-muted-dark bg-card;
+    @apply w-full border-collapse bg-card;
   }
   
   .cheatsheet-table th {
-    @apply bg-surface px-3 py-2 text-left font-semibold text-surface-foreground border-b border-muted-dark;
+    @apply bg-surface px-3 py-2 text-left font-semibold text-surface-foreground;
   }
   
   .cheatsheet-table td {
-    @apply px-3 py-1.5 border-b border-border-light text-sm;
+    @apply px-3 py-1.5 text-sm;
   }
   
   .drag-handle {
@@ -180,15 +180,66 @@
     body {
       background: white !important;
       color: black !important;
+      margin: 0 !important;
+      padding: 0 !important;
     }
     
+    /* Remove card borders and reduce padding */
+    .card {
+      border: none !important;
+      box-shadow: none !important;
+      padding: 0 !important;
+      margin: 0 !important;
+    }
+    
+    .card-content {
+      padding: 0 !important;
+    }
+    
+    /* Additional card border removal */
+    [class*="card"] {
+      border: none !important;
+      box-shadow: none !important;
+    }
+    
+    .print\:border-0 {
+      border: none !important;
+    }
+    
+    .print\:shadow-none {
+      box-shadow: none !important;
+    }
+    
+    /* Ensure full width for print containers */
+    .print\:w-full {
+      width: 100% !important;
+      max-width: none !important;
+    }
+    
+    /* Remove any margins/padding that might affect layout */
+    .max-w-4xl {
+      max-width: none !important;
+    }
+    
+    /* Table styles for print */
     .cheatsheet-table {
-      border: 1px solid hsl(var(--print-border)) !important;
+      width: 100% !important;
+      margin: 0 !important;
+      padding: 0 !important;
     }
     
     .cheatsheet-table th,
     .cheatsheet-table td {
-      border: 1px solid hsl(var(--print-border)) !important;
+      border: none !important;
+      padding-left: 3px !important;
+      padding-right: 3px !important;
+    }
+    
+    /* Ensure light gray background shows in print */
+    .bg-gray-100 {
+      background-color: #f3f4f6 !important;
+      -webkit-print-color-adjust: exact !important;
+      print-color-adjust: exact !important;
     }
   }
 }

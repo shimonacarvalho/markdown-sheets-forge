@@ -2,6 +2,7 @@ export interface CheatsheetTable {
   id: string;
   title: string;
   rows: string[][];
+  columnCount: number;
 }
 
 export interface Cheatsheet {
