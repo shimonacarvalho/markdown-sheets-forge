@@ -71,11 +71,13 @@ export function CheatsheetPreview({ cheatsheet, onBack }: CheatsheetPreviewProps
                 
                 return (
                   <div key={table.id} className="break-inside-avoid">
-                    <h3 className="font-semibold text-sm mb-2 text-center">
-                      {table.title}
-                    </h3>
                     <table className="cheatsheet-table text-xs">
                       <thead>
+                        <tr>
+                          <th colSpan={headers.length} className="text-center font-bold bg-primary/5 border-b-2 border-primary/20 px-2 py-1">
+                            {table.title}
+                          </th>
+                        </tr>
                         <tr>
                           {headers.map((header, index) => (
                             <th key={index} className="px-2 py-1">{header}</th>

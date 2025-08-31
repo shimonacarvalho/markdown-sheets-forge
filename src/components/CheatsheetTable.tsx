@@ -65,6 +65,11 @@ export function CheatsheetTable({ table, onDelete, isDragging }: CheatsheetTable
         <table className="cheatsheet-table">
           <thead>
             <tr>
+              <th colSpan={headers.length} className="text-center font-bold bg-primary/5 border-b-2 border-primary/20">
+                {table.title}
+              </th>
+            </tr>
+            <tr>
               {headers.map((header, index) => (
                 <th key={index}>{header}</th>
               ))}
