@@ -2,41 +2,70 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Definition of the design system. All colors, gradients, fonts, etc should be defined here. 
-All colors MUST be HSL.
-*/
+/* Cheatsheet Generator Design System */
 
 @layer base {
   :root {
-    --background: 0 0% 100%;
-    --foreground: 222.2 84% 4.9%;
+    /* Core Theme */
+    --background: 250 50% 98%;
+    --foreground: 224 20% 15%;
 
+    /* Cards and Surfaces */
     --card: 0 0% 100%;
-    --card-foreground: 222.2 84% 4.9%;
+    --card-foreground: 224 20% 15%;
+    --surface: 240 20% 97%;
+    --surface-foreground: 224 15% 25%;
 
+    /* Interactive Elements */
     --popover: 0 0% 100%;
-    --popover-foreground: 222.2 84% 4.9%;
+    --popover-foreground: 224 20% 15%;
 
-    --primary: 222.2 47.4% 11.2%;
-    --primary-foreground: 210 40% 98%;
+    /* Brand Colors */
+    --primary: 217 91% 60%;
+    --primary-foreground: 0 0% 100%;
+    --primary-hover: 217 91% 55%;
+    --primary-light: 217 91% 95%;
 
-    --secondary: 210 40% 96.1%;
-    --secondary-foreground: 222.2 47.4% 11.2%;
+    /* Secondary Actions */
+    --secondary: 210 25% 92%;
+    --secondary-foreground: 224 20% 25%;
+    --secondary-hover: 210 25% 88%;
 
-    --muted: 210 40% 96.1%;
-    --muted-foreground: 215.4 16.3% 46.9%;
+    /* Neutral Tones */
+    --muted: 210 25% 95%;
+    --muted-foreground: 215 15% 55%;
+    --muted-dark: 215 15% 85%;
 
-    --accent: 210 40% 96.1%;
-    --accent-foreground: 222.2 47.4% 11.2%;
+    /* Accent Colors */
+    --accent: 142 71% 45%;
+    --accent-foreground: 0 0% 100%;
+    --accent-light: 142 71% 95%;
 
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 210 40% 98%;
+    /* System Colors */
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 100%;
+    --warning: 38 92% 50%;
+    --warning-foreground: 0 0% 100%;
 
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
-    --ring: 222.2 84% 4.9%;
+    /* Borders and Inputs */
+    --border: 214 25% 88%;
+    --border-light: 214 25% 92%;
+    --input: 214 25% 94%;
+    --input-border: 214 25% 85%;
+    --ring: 217 91% 60%;
 
+    /* Layout & Typography */
     --radius: 0.5rem;
+    --radius-lg: 0.75rem;
+    --radius-xl: 1rem;
+    
+    /* Print Styles */
+    --print-border: 0 0% 80%;
+    --print-background: 0 0% 100%;
+    
+    /* Drag & Drop */
+    --drag-handle: 215 15% 70%;
+    --drag-active: 217 91% 85%;
 
     --sidebar-background: 0 0% 98%;
 
@@ -100,6 +129,66 @@ All colors MUST be HSL.
   }
 
   body {
-    @apply bg-background text-foreground;
+    @apply bg-background text-foreground font-sans;
+  }
+}
+
+@layer components {
+  /* Cheatsheet specific components */
+  .cheatsheet-table {
+    @apply w-full border-collapse border border-muted-dark bg-card;
+  }
+  
+  .cheatsheet-table th {
+    @apply bg-surface px-3 py-2 text-left font-semibold text-surface-foreground border-b border-muted-dark;
+  }
+  
+  .cheatsheet-table td {
+    @apply px-3 py-1.5 border-b border-border-light text-sm;
+  }
+  
+  .drag-handle {
+    @apply cursor-grab text-drag-handle hover:text-foreground transition-colors;
+  }
+  
+  .drag-handle:active {
+    @apply cursor-grabbing;
+  }
+  
+  .dragging {
+    @apply opacity-50 scale-95 transform;
+  }
+}
+
+@layer utilities {
+  /* Print styles */
+  @media print {
+    .no-print {
+      display: none !important;
+    }
+    
+    .print-page {
+      page-break-after: auto;
+      break-inside: avoid;
+    }
+    
+    .print-table {
+      break-inside: avoid;
+      page-break-inside: avoid;
+    }
+    
+    body {
+      background: white !important;
+      color: black !important;
+    }
+    
+    .cheatsheet-table {
+      border: 1px solid hsl(var(--print-border)) !important;
+    }
+    
+    .cheatsheet-table th,
+    .cheatsheet-table td {
+      border: 1px solid hsl(var(--print-border)) !important;
+    }
   }
 }
