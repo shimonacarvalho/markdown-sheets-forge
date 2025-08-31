@@ -132,7 +132,6 @@ const Index = () => {
         <CheatsheetEditor
           cheatsheet={currentCheatsheet}
           onUpdate={updateCheatsheet}
-          onPreview={goToPreview}
         />
       </div>
     );

@@ -12,17 +12,16 @@ import { Separator } from '@/components/ui/separator';
 import { CheatsheetTable } from './CheatsheetTable';
 import { AddTableDialog } from './AddTableDialog';
 import { Cheatsheet, CheatsheetTable as TableType } from '@/types/cheatsheet';
-import { Eye, Download, Copy } from 'lucide-react';
+import { Download, Copy, Printer } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { cheatsheetToMarkdown } from '@/utils/markdown';
 
 interface CheatsheetEditorProps {
   cheatsheet: Cheatsheet;
   onUpdate: (cheatsheet: Cheatsheet) => void;
-  onPreview: () => void;
 }
 
-export function CheatsheetEditor({ cheatsheet, onUpdate, onPreview }: CheatsheetEditorProps) {
+export function CheatsheetEditor({ cheatsheet, onUpdate }: CheatsheetEditorProps) {
   const { toast } = useToast();
   
   const sensors = useSensors(
@@ -65,6 +64,19 @@ export function CheatsheetEditor({ cheatsheet, onUpdate, onPreview }: Cheatsheet
     });
   };
 
+  const updateTable = (updatedTable: TableType) => {
+    const tableIndex = cheatsheet.tables.findIndex(table => table.id === updatedTable.id);
+    if (tableIndex >= 0) {
+      const newTables = [...cheatsheet.tables];
+      newTables[tableIndex] = updatedTable;
+      onUpdate({
+        ...cheatsheet,
+        tables: newTables,
+        updatedAt: new Date(),
+      });
+    }
+  };
+
   const updateField = (field: keyof Cheatsheet, value: any) => {
     onUpdate({
       ...cheatsheet,
@@ -99,6 +111,10 @@ export function CheatsheetEditor({ cheatsheet, onUpdate, onPreview }: Cheatsheet
         description: 'Cheatsheet copied to clipboard as markdown',
       });
     });
+  };
+
+  const handlePrint = () => {
+    window.print();
   };
 
   return (
@@ -151,9 +167,9 @@ export function CheatsheetEditor({ cheatsheet, onUpdate, onPreview }: Cheatsheet
 
           <div className="flex flex-wrap gap-2">
             <AddTableDialog onAddTable={addTable} />
-            <Button variant="outline" onClick={onPreview} className="gap-2">
-              <Eye className="h-4 w-4" />
-              Preview
+            <Button variant="outline" onClick={handlePrint} className="gap-2">
+              <Printer className="h-4 w-4" />
+              Print
             </Button>
             <Button variant="outline" onClick={exportToMarkdown} className="gap-2">
               <Download className="h-4 w-4" />
@@ -167,10 +183,11 @@ export function CheatsheetEditor({ cheatsheet, onUpdate, onPreview }: Cheatsheet
         </CardContent>
       </Card>
 
-      {/* Tables */}
-      {cheatsheet.tables.length > 0 ? (
-        <div>
-          <h3 className="text-lg font-semibold mb-4">Tables ({cheatsheet.tables.length})</h3>
+      {/* Print-optimized layout */}
+      <div className={`grid gap-4 print:gap-2 ${
+        cheatsheet.columns === 2 ? 'md:grid-cols-2' : 'md:grid-cols-3'
+      } print:text-xs`}>
+        {cheatsheet.tables.length > 0 ? (
           <DndContext 
             sensors={sensors}
             collisionDetection={closestCenter}
@@ -181,26 +198,27 @@ export function CheatsheetEditor({ cheatsheet, onUpdate, onPreview }: Cheatsheet
               items={cheatsheet.tables.map(table => table.id)}
               strategy={verticalListSortingStrategy}
             >
-              <div className="space-y-4">
-                {cheatsheet.tables.map((table) => (
-                  <CheatsheetTable
-                    key={table.id}
-                    table={table}
-                    onDelete={deleteTable}
-                  />
-                ))}
-              </div>
+              {cheatsheet.tables.map((table) => (
+                <CheatsheetTable
+                  key={table.id}
+                  table={table}
+                  onDelete={deleteTable}
+                  onUpdate={updateTable}
+                />
+              ))}
             </SortableContext>
           </DndContext>
-        </div>
-      ) : (
-        <Card>
-          <CardContent className="py-12 text-center">
-            <p className="text-muted-foreground mb-4">No tables added yet</p>
-            <AddTableDialog onAddTable={addTable} />
-          </CardContent>
-        </Card>
-      )}
+        ) : (
+          <div className="col-span-full">
+            <Card>
+              <CardContent className="py-12 text-center">
+                <p className="text-muted-foreground mb-4">No tables added yet</p>
+                <AddTableDialog onAddTable={addTable} />
+              </CardContent>
+            </Card>
+          </div>
+        )}
+      </div>
     </div>
   );
 }

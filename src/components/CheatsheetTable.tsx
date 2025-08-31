@@ -1,17 +1,24 @@
+import { useState } from 'react';
 import { CheatsheetTable as TableType } from '@/types/cheatsheet';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { GripVertical, Trash2 } from 'lucide-react';
+import { Textarea } from '@/components/ui/textarea';
+import { GripVertical, Trash2, Edit, Save, X } from 'lucide-react';
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
+import { parseMarkdownTable } from '@/utils/markdown';
 
 interface CheatsheetTableProps {
   table: TableType;
   onDelete: (id: string) => void;
+  onUpdate: (table: TableType) => void;
   isDragging?: boolean;
 }
 
-export function CheatsheetTable({ table, onDelete, isDragging }: CheatsheetTableProps) {
+export function CheatsheetTable({ table, onDelete, onUpdate, isDragging }: CheatsheetTableProps) {
+  const [isEditing, setIsEditing] = useState(false);
+  const [editContent, setEditContent] = useState('');
+  
   const {
     attributes,
     listeners,
@@ -32,6 +39,40 @@ export function CheatsheetTable({ table, onDelete, isDragging }: CheatsheetTable
 
   const [headers, ...dataRows] = table.rows;
 
+  const handleEdit = () => {
+    // Convert table back to markdown for editing
+    let markdown = `| ${table.title} |\n`;
+    markdown += `| ${headers.join(' | ')} |\n`;
+    markdown += `| ${headers.map(() => '--------').join(' | ')} |\n`;
+    dataRows.forEach(row => {
+      markdown += `| ${row.join(' | ')} |\n`;
+    });
+    
+    setEditContent(markdown);
+    setIsEditing(true);
+  };
+
+  const handleSave = () => {
+    try {
+      const updatedTable = parseMarkdownTable(editContent);
+      if (updatedTable) {
+        onUpdate({
+          ...table,
+          title: updatedTable.title,
+          rows: updatedTable.rows,
+        });
+        setIsEditing(false);
+      }
+    } catch (error) {
+      console.error('Error parsing markdown:', error);
+    }
+  };
+
+  const handleCancel = () => {
+    setIsEditing(false);
+    setEditContent('');
+  };
+
   return (
     <Card 
       ref={setNodeRef} 
@@ -43,48 +84,85 @@ export function CheatsheetTable({ table, onDelete, isDragging }: CheatsheetTable
       <div className="flex items-center justify-between p-3 border-b no-print">
         <div className="flex items-center gap-2">
           <div 
-            className="drag-handle"
+            className="drag-handle cursor-grab active:cursor-grabbing"
             {...attributes}
             {...listeners}
           >
-            <GripVertical className="h-4 w-4" />
+            <GripVertical className="h-4 w-4 text-muted-foreground" />
           </div>
           <h3 className="font-medium text-sm">{table.title}</h3>
         </div>
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={() => onDelete(table.id)}
-          className="opacity-0 group-hover:opacity-100 transition-opacity h-8 w-8 p-0 hover:bg-destructive/10 hover:text-destructive"
-        >
-          <Trash2 className="h-3 w-3" />
-        </Button>
+        <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+          {!isEditing ? (
+            <>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={handleEdit}
+                className="h-8 w-8 p-0 hover:bg-primary/10 hover:text-primary"
+              >
+                <Edit className="h-3 w-3" />
+              </Button>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => onDelete(table.id)}
+                className="h-8 w-8 p-0 hover:bg-destructive/10 hover:text-destructive"
+              >
+                <Trash2 className="h-3 w-3" />
+              </Button>
+            </>
+          ) : (
+            <>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={handleSave}
+                className="h-8 w-8 p-0 hover:bg-green-100 hover:text-green-600"
+              >
+                <Save className="h-3 w-3" />
+              </Button>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={handleCancel}
+                className="h-8 w-8 p-0 hover:bg-muted"
+              >
+                <X className="h-3 w-3" />
+              </Button>
+            </>
+          )}
+        </div>
       </div>
       
       <div className="p-3">
-        <table className="cheatsheet-table">
-          <thead>
-            <tr>
-              <th colSpan={headers.length} className="text-center font-bold bg-primary/5 border-b-2 border-primary/20">
-                {table.title}
-              </th>
-            </tr>
-            <tr>
-              {headers.map((header, index) => (
-                <th key={index}>{header}</th>
-              ))}
-            </tr>
-          </thead>
-          <tbody>
-            {dataRows.map((row, rowIndex) => (
-              <tr key={rowIndex}>
-                {row.map((cell, cellIndex) => (
-                  <td key={cellIndex}>{cell}</td>
+        {isEditing ? (
+          <Textarea
+            value={editContent}
+            onChange={(e) => setEditContent(e.target.value)}
+            className="min-h-[150px] font-mono text-sm"
+            placeholder="Edit your markdown table here..."
+          />
+        ) : (
+          <table className="cheatsheet-table w-full">
+            <thead>
+              <tr>
+                {headers.map((header, index) => (
+                  <th key={index} className="text-left p-2 border-b font-semibold">{header}</th>
                 ))}
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {dataRows.map((row, rowIndex) => (
+                <tr key={rowIndex}>
+                  {row.map((cell, cellIndex) => (
+                    <td key={cellIndex} className="p-2 border-b text-sm">{cell}</td>
+                  ))}
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        )}
       </div>
     </Card>
   );
