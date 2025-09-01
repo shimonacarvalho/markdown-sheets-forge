@@ -9,7 +9,7 @@ export default defineConfig(({ mode }) => ({
     host: "::",
     port: 8080,
   },
-  base: mode === 'production' ? './' : '/',
+  base: mode === 'production' ? '/markdown-sheets-forge/' : '/',
   plugins: [
     react(),
     mode === 'development' &&
