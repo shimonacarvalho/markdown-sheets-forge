@@ -241,5 +241,16 @@
       -webkit-print-color-adjust: exact !important;
       print-color-adjust: exact !important;
     }
+    
+    /* Masonry layout styles */
+    .break-inside-avoid {
+      break-inside: avoid !important;
+      page-break-inside: avoid !important;
+    }
+    
+    /* Column gap adjustments for print */
+    .print\:gap-4 {
+      column-gap: 1rem !important;
+    }
   }
 }

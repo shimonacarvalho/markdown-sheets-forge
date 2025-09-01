@@ -192,11 +192,11 @@ export function CheatsheetEditor({ cheatsheet, onUpdate }: CheatsheetEditorProps
       </Card>
 
       {/* Print-optimized layout */}
-      <div className={`grid gap-4 print:gap-4 border-red-500 ${
+      <div className={`gap-4 print:gap-4 print:text-xs print:w-full ${
         cheatsheet.columns === 2 
-          ? 'md:grid-cols-2 print:grid-cols-2' 
-          : 'md:grid-cols-3 print:grid-cols-3'
-      } print:text-xs print:w-full`}>
+          ? 'columns-2 md:columns-2 print:columns-2' 
+          : 'columns-2 md:columns-3 print:columns-3'
+      }`}>
         {cheatsheet.tables.length > 0 ? (
           <DndContext 
             sensors={sensors}
@@ -209,12 +209,13 @@ export function CheatsheetEditor({ cheatsheet, onUpdate }: CheatsheetEditorProps
               strategy={verticalListSortingStrategy}
             >
               {cheatsheet.tables.map((table) => (
-                <CheatsheetTable
-                  key={table.id}
-                  table={table}
-                  onDelete={deleteTable}
-                  onUpdate={updateTable}
-                />
+                <div key={table.id} className="break-inside-avoid mb-4 print:mb-4">
+                  <CheatsheetTable
+                    table={table}
+                    onDelete={deleteTable}
+                    onUpdate={updateTable}
+                  />
+                </div>
               ))}
             </SortableContext>
           </DndContext>
