@@ -1,30 +1,61 @@
-import { useState } from 'react';
-import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, useSensors } from '@dnd-kit/core';
-import { arrayMove, SortableContext, sortableKeyboardCoordinates, verticalListSortingStrategy } from '@dnd-kit/sortable';
-import { restrictToVerticalAxis } from '@dnd-kit/modifiers';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
-import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Separator } from '@/components/ui/separator';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { CheatsheetTable } from './CheatsheetTable';
-import { AddTableDialog } from './AddTableDialog';
-import { Cheatsheet, CheatsheetTable as TableType } from '@/types/cheatsheet';
-import { Download, Copy, Printer, Upload } from 'lucide-react';
-import { useToast } from '@/hooks/use-toast';
-import { cheatsheetToMarkdown, parseMarkdownTable, parseCheatsheetFromMarkdown } from '@/utils/markdown';
+import { useState } from "react";
+import {
+  DndContext,
+  closestCenter,
+  KeyboardSensor,
+  PointerSensor,
+  useSensor,
+  useSensors,
+} from "@dnd-kit/core";
+import {
+  arrayMove,
+  SortableContext,
+  sortableKeyboardCoordinates,
+  verticalListSortingStrategy,
+} from "@dnd-kit/sortable";
+import { restrictToVerticalAxis } from "@dnd-kit/modifiers";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Separator } from "@/components/ui/separator";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import { CheatsheetTable } from "./CheatsheetTable";
+import { AddTableDialog } from "./AddTableDialog";
+import { Cheatsheet, CheatsheetTable as TableType } from "@/types/cheatsheet";
+import { Download, Copy, Printer, Upload } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
+import {
+  cheatsheetToMarkdown,
+  parseMarkdownTable,
+  parseCheatsheetFromMarkdown,
+} from "@/utils/markdown";
 
 interface CheatsheetEditorProps {
   cheatsheet: Cheatsheet;
   onUpdate: (cheatsheet: Cheatsheet) => void;
 }
 
-export function CheatsheetEditor({ cheatsheet, onUpdate }: CheatsheetEditorProps) {
+export function CheatsheetEditor({
+  cheatsheet,
+  onUpdate,
+}: CheatsheetEditorProps) {
   const { toast } = useToast();
-  
+
   const sensors = useSensors(
     useSensor(PointerSensor),
     useSensor(KeyboardSensor, {
@@ -36,11 +67,15 @@ export function CheatsheetEditor({ cheatsheet, onUpdate }: CheatsheetEditorProps
     const { active, over } = event;
 
     if (active.id !== over.id) {
-      const oldIndex = cheatsheet.tables.findIndex((table) => table.id === active.id);
-      const newIndex = cheatsheet.tables.findIndex((table) => table.id === over.id);
+      const oldIndex = cheatsheet.tables.findIndex(
+        (table) => table.id === active.id
+      );
+      const newIndex = cheatsheet.tables.findIndex(
+        (table) => table.id === over.id
+      );
 
       const newTables = arrayMove(cheatsheet.tables, oldIndex, newIndex);
-      
+
       onUpdate({
         ...cheatsheet,
         tables: newTables,
@@ -60,13 +95,15 @@ export function CheatsheetEditor({ cheatsheet, onUpdate }: CheatsheetEditorProps
   const deleteTable = (tableId: string) => {
     onUpdate({
       ...cheatsheet,
-      tables: cheatsheet.tables.filter(table => table.id !== tableId),
+      tables: cheatsheet.tables.filter((table) => table.id !== tableId),
       updatedAt: new Date(),
     });
   };
 
   const updateTable = (updatedTable: TableType) => {
-    const tableIndex = cheatsheet.tables.findIndex(table => table.id === updatedTable.id);
+    const tableIndex = cheatsheet.tables.findIndex(
+      (table) => table.id === updatedTable.id
+    );
     if (tableIndex >= 0) {
       const newTables = [...cheatsheet.tables];
       newTables[tableIndex] = updatedTable;
@@ -88,19 +125,19 @@ export function CheatsheetEditor({ cheatsheet, onUpdate }: CheatsheetEditorProps
 
   const exportToMarkdown = () => {
     const markdown = cheatsheetToMarkdown(cheatsheet);
-    const blob = new Blob([markdown], { type: 'text/markdown' });
+    const blob = new Blob([markdown], { type: "text/markdown" });
     const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
+    const a = document.createElement("a");
     a.href = url;
-    a.download = `${cheatsheet.name.replace(/\s+/g, '-').toLowerCase()}.md`;
+    a.download = `${cheatsheet.name.replace(/\s+/g, "-").toLowerCase()}.md`;
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
-    
+
     toast({
-      title: 'Exported',
-      description: 'Cheatsheet exported as markdown file',
+      title: "Exported",
+      description: "Cheatsheet exported as markdown file",
     });
   };
 
@@ -108,8 +145,8 @@ export function CheatsheetEditor({ cheatsheet, onUpdate }: CheatsheetEditorProps
     const markdown = cheatsheetToMarkdown(cheatsheet);
     navigator.clipboard.writeText(markdown).then(() => {
       toast({
-        title: 'Copied',
-        description: 'Cheatsheet copied to clipboard as markdown',
+        title: "Copied",
+        description: "Cheatsheet copied to clipboard as markdown",
       });
     });
   };
@@ -119,17 +156,17 @@ export function CheatsheetEditor({ cheatsheet, onUpdate }: CheatsheetEditorProps
   };
 
   const [isImportOpen, setIsImportOpen] = useState(false);
-  const [importContent, setImportContent] = useState('');
+  const [importContent, setImportContent] = useState("");
 
   const handleImport = () => {
     try {
       const result = parseCheatsheetFromMarkdown(importContent);
-      
+
       if (!result) {
         toast({
-          title: 'Error',
-          description: 'No valid cheatsheet found in the imported content',
-          variant: 'destructive',
+          title: "Error",
+          description: "No valid cheatsheet found in the imported content",
+          variant: "destructive",
         });
         return;
       }
@@ -144,18 +181,18 @@ export function CheatsheetEditor({ cheatsheet, onUpdate }: CheatsheetEditorProps
       });
 
       setIsImportOpen(false);
-      setImportContent('');
-      
+      setImportContent("");
+
       toast({
-        title: 'Imported',
+        title: "Imported",
         description: `Successfully imported ${result.tables.length} tables`,
       });
     } catch (error) {
-      console.error('Import error:', error);
+      console.error("Import error:", error);
       toast({
-        title: 'Error',
-        description: 'Failed to import cheatsheet. Please check the format.',
-        variant: 'destructive',
+        title: "Error",
+        description: "Failed to import cheatsheet. Please check the format.",
+        variant: "destructive",
       });
     }
   };
@@ -182,15 +219,17 @@ export function CheatsheetEditor({ cheatsheet, onUpdate }: CheatsheetEditorProps
               <Input
                 id="name"
                 value={cheatsheet.name}
-                onChange={(e) => updateField('name', e.target.value)}
+                onChange={(e) => updateField("name", e.target.value)}
                 placeholder="Enter cheatsheet name"
               />
             </div>
             <div>
               <Label htmlFor="columns">Columns</Label>
-              <Select 
-                value={cheatsheet.columns.toString()} 
-                onValueChange={(value) => updateField('columns', parseInt(value))}
+              <Select
+                value={cheatsheet.columns.toString()}
+                onValueChange={(value) =>
+                  updateField("columns", parseInt(value))
+                }
               >
                 <SelectTrigger id="columns">
                   <SelectValue />
@@ -202,13 +241,13 @@ export function CheatsheetEditor({ cheatsheet, onUpdate }: CheatsheetEditorProps
               </Select>
             </div>
           </div>
-          
+
           <div>
             <Label htmlFor="description">Description</Label>
             <Textarea
               id="description"
               value={cheatsheet.description}
-              onChange={(e) => updateField('description', e.target.value)}
+              onChange={(e) => updateField("description", e.target.value)}
               placeholder="Brief description of the cheatsheet"
               className="min-h-[80px]"
             />
@@ -235,7 +274,9 @@ export function CheatsheetEditor({ cheatsheet, onUpdate }: CheatsheetEditorProps
                 </DialogHeader>
                 <div className="space-y-4">
                   <div>
-                    <Label htmlFor="import-content">Paste your cheatsheet markdown here</Label>
+                    <Label htmlFor="import-content">
+                      Paste your cheatsheet markdown here
+                    </Label>
                     <Textarea
                       id="import-content"
                       value={importContent}
@@ -245,17 +286,22 @@ export function CheatsheetEditor({ cheatsheet, onUpdate }: CheatsheetEditorProps
                     />
                   </div>
                   <div className="flex justify-end gap-2">
-                    <Button variant="outline" onClick={() => setIsImportOpen(false)}>
+                    <Button
+                      variant="outline"
+                      onClick={() => setIsImportOpen(false)}
+                    >
                       Cancel
                     </Button>
-                    <Button onClick={handleImport}>
-                      Import
-                    </Button>
+                    <Button onClick={handleImport}>Import</Button>
                   </div>
                 </div>
               </DialogContent>
             </Dialog>
-            <Button variant="outline" onClick={copyToClipboard} className="gap-2">
+            <Button
+              variant="outline"
+              onClick={copyToClipboard}
+              className="gap-2"
+            >
               <Copy className="h-4 w-4" />
               Copy
             </Button>
@@ -264,24 +310,29 @@ export function CheatsheetEditor({ cheatsheet, onUpdate }: CheatsheetEditorProps
       </Card>
 
       {/* Print-optimized layout */}
-      <div className={`gap-4 print:gap-4 print:text-xs print:w-full ${
-        cheatsheet.columns === 2 
-          ? 'columns-2 md:columns-2 print:columns-2' 
-          : 'columns-2 md:columns-3 print:columns-3'
-      }`}>
+      <div
+        className={`gap-4 print:gap-4 print:text-xs print:w-full ${
+          cheatsheet.columns === 2
+            ? "columns-2 md:columns-2 print:columns-2"
+            : "columns-2 md:columns-3 print:columns-3"
+        }`}
+      >
         {cheatsheet.tables.length > 0 ? (
-          <DndContext 
+          <DndContext
             sensors={sensors}
             collisionDetection={closestCenter}
             onDragEnd={handleDragEnd}
             modifiers={[]}
           >
-            <SortableContext 
-              items={cheatsheet.tables.map(table => table.id)}
+            <SortableContext
+              items={cheatsheet.tables.map((table) => table.id)}
               strategy={verticalListSortingStrategy}
             >
               {cheatsheet.tables.map((table) => (
-                <div key={table.id} className="break-inside-avoid mb-4 print:mb-4">
+                <div
+                  key={table.id}
+                  className="break-inside-avoid mb-4 print:mb-4"
+                >
                   <CheatsheetTable
                     table={table}
                     onDelete={deleteTable}
@@ -292,14 +343,7 @@ export function CheatsheetEditor({ cheatsheet, onUpdate }: CheatsheetEditorProps
             </SortableContext>
           </DndContext>
         ) : (
-          <div className="col-span-full">
-            <Card>
-              <CardContent className="py-12 text-center">
-                <p className="text-muted-foreground mb-4">No tables added yet</p>
-                <AddTableDialog onAddTable={addTable} />
-              </CardContent>
-            </Card>
-          </div>
+          <></>
         )}
       </div>
     </div>
