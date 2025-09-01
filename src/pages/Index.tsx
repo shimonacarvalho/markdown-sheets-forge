@@ -4,13 +4,24 @@ import { CheatsheetEditor } from '@/components/CheatsheetEditor';
 import { CheatsheetPreview } from '@/components/CheatsheetPreview';
 import { Cheatsheet } from '@/types/cheatsheet';
 import { useLocalStorage } from '@/hooks/useLocalStorage';
+import { getSampleCheatsheet } from '@/utils/markdown';
 
 type View = 'library' | 'editor' | 'preview';
 
 const Index = () => {
   const [cheatsheets, setCheatsheets] = useLocalStorage<Cheatsheet[]>('cheatsheets', []);
+  const [hasVisited, setHasVisited] = useLocalStorage<boolean>('hasVisited', false);
   const [currentCheatsheet, setCurrentCheatsheet] = useState<Cheatsheet | null>(null);
   const [view, setView] = useState<View>('library');
+
+  // Preload sample cheatsheet only on first visit if no cheatsheets exist
+  useEffect(() => {
+    if (cheatsheets.length === 0 && !hasVisited) {
+      const sampleCheatsheet = getSampleCheatsheet();
+      setCheatsheets([sampleCheatsheet]);
+      setHasVisited(true);
+    }
+  }, [cheatsheets.length, hasVisited, setCheatsheets, setHasVisited]);
 
   // Show auth message for features that require login
   const showAuthMessage = () => {
@@ -50,7 +61,14 @@ const Index = () => {
   };
 
   const deleteCheatsheet = (id: string) => {
-    setCheatsheets(prev => prev.filter(sheet => sheet.id !== id));
+    const updatedCheatsheets = cheatsheets.filter(sheet => sheet.id !== id);
+    setCheatsheets(updatedCheatsheets);
+    
+    // If this deletion results in no cheatsheets left, mark that the user has deleted the last one
+    if (updatedCheatsheets.length === 0) {
+      setHasDeletedLastCheatsheet(true);
+    }
+    
     if (currentCheatsheet?.id === id) {
       setCurrentCheatsheet(null);
       setView('library');

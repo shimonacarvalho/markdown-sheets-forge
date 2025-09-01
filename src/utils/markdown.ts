@@ -1,4 +1,5 @@
 import { CheatsheetTable, Cheatsheet } from '@/types/cheatsheet';
+import sampleCheatsheetMarkdown from '@/data/sample-cheatsheet.md?raw';
 
 export function parseMarkdownTable(markdown: string): CheatsheetTable | null {
   // Split markdown into lines and filter out empty lines
@@ -144,4 +145,31 @@ export function parseCheatsheetFromMarkdown(markdown: string): { name: string; d
     console.error('Error parsing cheatsheet from markdown:', error);
     return null;
   }
+}
+
+export function getSampleCheatsheet(): Cheatsheet {
+  const result = parseCheatsheetFromMarkdown(sampleCheatsheetMarkdown);
+  
+  if (!result) {
+    // Fallback if parsing fails
+    return {
+      id: 'sample-python',
+      name: 'Python Example',
+      description: 'Created by Shimona Carvalho',
+      columns: 2,
+      tables: [],
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    };
+  }
+
+  return {
+    id: 'sample-python',
+    name: result.name,
+    description: result.description,
+    columns: 2,
+    tables: result.tables,
+    createdAt: new Date(),
+    updatedAt: new Date(),
+  };
 }
