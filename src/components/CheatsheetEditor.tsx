@@ -9,12 +9,13 @@ import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Separator } from '@/components/ui/separator';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { CheatsheetTable } from './CheatsheetTable';
 import { AddTableDialog } from './AddTableDialog';
 import { Cheatsheet, CheatsheetTable as TableType } from '@/types/cheatsheet';
-import { Download, Copy, Printer } from 'lucide-react';
+import { Download, Copy, Printer, Upload } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
-import { cheatsheetToMarkdown } from '@/utils/markdown';
+import { cheatsheetToMarkdown, parseMarkdownTable, parseCheatsheetFromMarkdown } from '@/utils/markdown';
 
 interface CheatsheetEditorProps {
   cheatsheet: Cheatsheet;
@@ -117,6 +118,48 @@ export function CheatsheetEditor({ cheatsheet, onUpdate }: CheatsheetEditorProps
     window.print();
   };
 
+  const [isImportOpen, setIsImportOpen] = useState(false);
+  const [importContent, setImportContent] = useState('');
+
+  const handleImport = () => {
+    try {
+      const result = parseCheatsheetFromMarkdown(importContent);
+      
+      if (!result) {
+        toast({
+          title: 'Error',
+          description: 'No valid cheatsheet found in the imported content',
+          variant: 'destructive',
+        });
+        return;
+      }
+
+      // Update the cheatsheet
+      onUpdate({
+        ...cheatsheet,
+        name: result.name,
+        description: result.description,
+        tables: result.tables,
+        updatedAt: new Date(),
+      });
+
+      setIsImportOpen(false);
+      setImportContent('');
+      
+      toast({
+        title: 'Imported',
+        description: `Successfully imported ${result.tables.length} tables`,
+      });
+    } catch (error) {
+      console.error('Import error:', error);
+      toast({
+        title: 'Error',
+        description: 'Failed to import cheatsheet. Please check the format.',
+        variant: 'destructive',
+      });
+    }
+  };
+
   return (
     <div className="max-w-4xl mx-auto p-0 space-y-2">
       {/* Print-only header */}
@@ -179,10 +222,39 @@ export function CheatsheetEditor({ cheatsheet, onUpdate }: CheatsheetEditorProps
               <Printer className="h-4 w-4" />
               Print
             </Button>
-            <Button variant="outline" onClick={exportToMarkdown} className="gap-2">
-              <Download className="h-4 w-4" />
-              Export
-            </Button>
+            <Dialog open={isImportOpen} onOpenChange={setIsImportOpen}>
+              <DialogTrigger asChild>
+                <Button variant="outline" className="gap-2">
+                  <Upload className="h-4 w-4" />
+                  Import
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="max-w-2xl">
+                <DialogHeader>
+                  <DialogTitle>Import Cheatsheet</DialogTitle>
+                </DialogHeader>
+                <div className="space-y-4">
+                  <div>
+                    <Label htmlFor="import-content">Paste your cheatsheet markdown here</Label>
+                    <Textarea
+                      id="import-content"
+                      value={importContent}
+                      onChange={(e) => setImportContent(e.target.value)}
+                      placeholder="Paste the markdown content from a copied cheatsheet..."
+                      className="min-h-[300px] font-mono text-sm"
+                    />
+                  </div>
+                  <div className="flex justify-end gap-2">
+                    <Button variant="outline" onClick={() => setIsImportOpen(false)}>
+                      Cancel
+                    </Button>
+                    <Button onClick={handleImport}>
+                      Import
+                    </Button>
+                  </div>
+                </div>
+              </DialogContent>
+            </Dialog>
             <Button variant="outline" onClick={copyToClipboard} className="gap-2">
               <Copy className="h-4 w-4" />
               Copy

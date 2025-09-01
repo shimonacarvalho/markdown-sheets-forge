@@ -1,4 +1,4 @@
-import { CheatsheetTable } from '@/types/cheatsheet';
+import { CheatsheetTable, Cheatsheet } from '@/types/cheatsheet';
 
 export function parseMarkdownTable(markdown: string): CheatsheetTable | null {
   // Split markdown into lines and filter out empty lines
@@ -70,7 +70,7 @@ export function tableToMarkdown(table: CheatsheetTable): string {
   return markdown;
 }
 
-export function cheatsheetToMarkdown(cheatsheet: any): string {
+export function cheatsheetToMarkdown(cheatsheet: Cheatsheet): string {
   let markdown = `# ${cheatsheet.name}\n\n`;
   
   if (cheatsheet.description) {
@@ -82,4 +82,66 @@ export function cheatsheetToMarkdown(cheatsheet: any): string {
   });
   
   return markdown;
+}
+
+export function parseCheatsheetFromMarkdown(markdown: string): { name: string; description: string; tables: CheatsheetTable[] } | null {
+  try {
+    const lines = markdown.trim().split('\n');
+    if (lines.length === 0) return null;
+
+    // Parse the cheatsheet header
+    let name = 'Imported Cheatsheet';
+    let description = '';
+    let currentIndex = 0;
+
+    // Check for title
+    if (lines[0].startsWith('# ')) {
+      name = lines[0].substring(2).trim();
+      currentIndex = 1;
+    }
+
+    // Check for description (lines after title until first table)
+    const descriptionLines = [];
+    while (currentIndex < lines.length && !lines[currentIndex].startsWith('|')) {
+      const line = lines[currentIndex].trim();
+      if (line) {
+        descriptionLines.push(line);
+      }
+      currentIndex++;
+    }
+    description = descriptionLines.join('\n');
+
+    // Parse tables
+    const tables: CheatsheetTable[] = [];
+    let tableContent = '';
+    
+    for (let i = currentIndex; i < lines.length; i++) {
+      const line = lines[i];
+      if (line.startsWith('|')) {
+        tableContent += line + '\n';
+      } else if (tableContent.trim()) {
+        // End of table, parse it
+        const table = parseMarkdownTable(tableContent.trim());
+        if (table) {
+          tables.push(table);
+        }
+        tableContent = '';
+      }
+    }
+    
+    // Parse last table if exists
+    if (tableContent.trim()) {
+      const table = parseMarkdownTable(tableContent.trim());
+      if (table) {
+        tables.push(table);
+      }
+    }
+
+    if (tables.length === 0) return null;
+
+    return { name, description, tables };
+  } catch (error) {
+    console.error('Error parsing cheatsheet from markdown:', error);
+    return null;
+  }
 }

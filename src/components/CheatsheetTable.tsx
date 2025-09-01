@@ -86,7 +86,7 @@ export function CheatsheetTable({
         isCurrentlyDragging ? "dragging shadow-lg" : "hover:shadow-md"
       }`}
     >
-      <div className="flex items-center justify-between p-3 border-b no-print">
+      <div className="flex items-center justify-between p-3 border-b no-print bg-gray-100">
         <div className="flex items-center gap-2">
           <div
             className="drag-handle cursor-grab active:cursor-grabbing"
@@ -95,7 +95,7 @@ export function CheatsheetTable({
           >
             <GripVertical className="h-4 w-4 text-muted-foreground" />
           </div>
-          <h3 className="font-medium text-sm">{table.title}</h3>
+          <h3 className="font-bold text-md uppercase">{table.title}</h3>
         </div>
         <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
           {!isEditing ? (
@@ -150,7 +150,7 @@ export function CheatsheetTable({
           />
         ) : (
           <table className="cheatsheet-table w-full">
-            <thead>
+            <thead className="hidden print:table-header-group">
               <tr>
                 <th
                   colSpan={table.columnCount}
