@@ -137,13 +137,7 @@ const Index = () => {
               ← Back to Library
             </button>
             <div className="text-sm text-muted-foreground">
-              Need to save permanently? 
-              <button 
-                onClick={showAuthMessage}
-                className="text-primary hover:underline ml-1"
-              >
-                Set up login
-              </button>
+              Saves in your browser!
             </div>
           </div>
         </div>

@@ -105,8 +105,8 @@ export function EditorCard({
   };
 
   return (
-    <div className="pb-2.5">
-      <Card className="no-print">
+    <div className="pb-2.5 no-print">
+      <Card>
         <CardHeader>
           <CardTitle>Cheatsheet Editor</CardTitle>
         </CardHeader>

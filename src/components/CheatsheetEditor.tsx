@@ -89,21 +89,21 @@ export function CheatsheetEditor({
   return (
     <div className="max-w-4xl mx-auto p-0 space-y-2">
       {/* Print-only header */}
-      <div className="hidden print:block print:mb-6">
-        <h1 className="text-2xl font-bold mb-2">{cheatsheet.name}</h1>
+      <div className="hidden print:block print:mb-0">
+        <h1 className="text-2xl font-bold mb-0">{cheatsheet.name}</h1>
         {cheatsheet.description && (
           <p className="text-muted-foreground">{cheatsheet.description}</p>
         )}
       </div>
 
-      {/* Header */}
+      {/* EditorCard only visible in editor view */}
       <EditorCard
         cheatsheet={cheatsheet}
         onUpdate={onUpdate}
         onAddTable={addTable}
       />
 
-      {/* Print-optimized layout */}
+      {/* Cheatsheet tables*/}
       <div
         className={`gap-4 print:gap-4 print:text-xs print:w-full ${
           cheatsheet.columns === 2

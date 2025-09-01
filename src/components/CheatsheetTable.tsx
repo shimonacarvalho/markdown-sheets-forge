@@ -140,7 +140,7 @@ export function CheatsheetTable({
         </div>
       </div>
 
-      <div className="p-0">
+      <div className="print:p-0">
         {isEditing ? (
           <Textarea
             value={editContent}
@@ -149,7 +149,7 @@ export function CheatsheetTable({
             placeholder="Edit your markdown table here..."
           />
         ) : (
-          <table className="cheatsheet-table w-full">
+          <table className="cheatsheet-table w-full print:mb-0 mb-5 ">
             <thead className="hidden print:table-header-group">
               <tr>
                 <th
@@ -164,7 +164,7 @@ export function CheatsheetTable({
               {dataRows.map((row, rowIndex) => (
                 <tr key={rowIndex}>
                   {row.map((cell, cellIndex) => (
-                    <td key={cellIndex} className="p-2 text-sm">
+                    <td key={cellIndex} className="text-sm">
                       {cell}
                     </td>
                   ))}
